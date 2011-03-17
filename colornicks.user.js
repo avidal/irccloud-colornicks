@@ -1,5 +1,17 @@
+// ==UserScript==
+// @name            Colored nick names in IRCcloud
+// @version         0.1
+// @author          Alex Vidal, based on http://userscripts.org/scripts/show/88258, based on http://chatlogs.musicbrainz.org/mb_chatlogger.user.js
+// @licence         BSD
+//
+// @require         http://code.jquery.com/jquery-1.5.1.min.js
+//
+// @include         http://irccloud.com/*
+// @include         https://irccloud.com/*
+// ==/UserScript==
+
 /*
- * Based on this userscript http://userscripts.org/scripts/review/88258
+ * Based on this userscript http://userscripts.org/scripts/show/88258
  * by Lukáš Lalinský
  */
 
@@ -32,17 +44,15 @@
     }
 
     function recv(event) {
-        var t = event.target;
+        var $t = $(event.target);
 
         // new messages are divs with a class of chat
-        if(t.tagName != 'DIV' || $(t).hasClass('chat') == false) {
-            return;
-        }
+        if(!$t.is('div.chat')) return;
 
         //the actual div contains a bunch of spans, one for each part
         //of the message
 
-        var $author = $(t).find('span.author');
+        var $author = $t.find('span.author');
         var nick = $author.find('a').text();
 
         // get the color

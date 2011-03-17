@@ -7,6 +7,6 @@
     ],
     "content_scripts": [{
         "matches": ["*://irccloud.com/"],
-        "js": ["jquery-1.5.1.min.js", "colornicks.js"]
+        "js": ["jquery-1.5.1.min.js", "colornicks.user.js"]
     }]
 }
