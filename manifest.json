@@ -1,6 +1,6 @@
 {
     "name": "IRCCloud Nick Colors",
-    "version": "0.1",
+    "version": "0.2",
     "description": "Colors nicknames in IRCCloud chat.",
     "permissions": [
         "*://irccloud.com/"
