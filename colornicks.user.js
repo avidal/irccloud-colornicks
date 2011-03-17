@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Colored nick names in IRCcloud
-// @version         0.1
+// @version         0.2
 // @author          Alex Vidal, based on http://userscripts.org/scripts/show/88258, based on http://chatlogs.musicbrainz.org/mb_chatlogger.user.js
 // @licence         BSD
 //
@@ -15,32 +15,29 @@
  * by Lukáš Lalinský
  */
 
+// Hashing and color algorithms borrowed from the chromatabs Firefox extension.
+
 (function () {
 
+    var _cache = [];
+    var S = 1.0;
+    var L = 0.4;
+
     function hash(s) {
-        var h = 0;
-        for (var i = 0; i < s.length; i++) {
-            h = h * 33 + s.charCodeAt(i);
+        var h = 5381;
+
+        for(var i = 0; i < s.length; i++) {
+            h = ((h << 5) + h) + s.charCodeAt(i);
         }
+
         return h;
     }
 
-    var _cache = [];
     function get_color(nick) {
-        /* this function will return a proper color based on the 
-         * hashed value of the nickname */
-        if(_cache[nick]) return _cache[nick];
+        var hue = hash(nick) % 360;
 
-        var color;
+        return "hsl(" + hue + "," + S*100 + "%," + L*100 + "%)";
 
-        var h = hash(nick);
-        var mod = 200;
-        var r = 0 + 150 * (1.0 * (h % mod) / mod); h = Math.floor(h/mod);
-        var g = 0 + 150 * (1.0 * (h % mod) / mod); h = Math.floor(h/mod);
-        var b = 0 + 150 * (1.0 * (h % mod) / mod); h = Math.floor(h/mod);
-
-        color = "rgb("+Math.floor(r)+","+Math.floor(g)+","+Math.floor(b)+")";
-        return _cache[nick] = color;
     }
 
     function recv(event) {
