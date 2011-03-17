@@ -1,5 +1,5 @@
 A simple Chrome extension (and userscript) that colorizes nicks in the
 [IRCCloud](https://irccloud.com) client.
 
-You can get the extension here:
-https://chrome.google.com/extensions/detail/jhgnpcfeahhdnaddcbfhpncapfciline
+The extension is hosted on the Chrome Extension Gallery, here:
+[IRCCloud Nick Colors](https://chrome.google.com/extensions/detail/jhgnpcfeahhdnaddcbfhpncapfciline).
