@@ -1,0 +1,12 @@
+{
+    "name": "IRCCloud Nick Colors",
+    "version": "0.1",
+    "description": "Colors nicknames in IRCCloud chat.",
+    "permissions": [
+        "*://irccloud.com/"
+    ],
+    "content_scripts": [{
+        "matches": ["*://irccloud.com/"],
+        "js": ["jquery-1.5.1.min.js", "colornicks.js"]
+    }]
+}
