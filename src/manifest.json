@@ -1,6 +1,6 @@
 {
     "name": "IRCCloud Nick Colors",
-    "version": "0.3.3",
+    "version": "0.5",
     "description": "Colors nicknames in IRCCloud chat.",
     "icons": {
         "16": "res/icon16.png",
@@ -13,6 +13,6 @@
     ],
     "content_scripts": [{
         "matches": ["*://irccloud.com/", "*://www.irccloud.com/"],
-        "js": ["jquery-1.5.1.min.js", "colornicks.user.js"]
+        "js": ["colornicks.user.js"]
     }]
 }

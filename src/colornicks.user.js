@@ -1,10 +1,8 @@
 // ==UserScript==
 // @name            Colored nick names in IRCcloud
-// @version         0.3.3
+// @version         0.5
 // @author          Alex Vidal, based on http://userscripts.org/scripts/show/88258, based on http://chatlogs.musicbrainz.org/mb_chatlogger.user.js
 // @licence         BSD
-//
-// @require         http://code.jquery.com/jquery-1.5.1.min.js
 //
 // @include         http://irccloud.com/*
 // @include         https://irccloud.com/*
@@ -19,11 +17,20 @@
 
 // Hashing and color algorithms borrowed from the chromatabs Firefox extension.
 
-(function () {
+function colornicks($) {
+
+    if(!controller) {
+        window.setTimeout(function() { colornicks($) }, 100);
+        return;
+    }
 
     var _cache = [];
     var S = 1.0;
     var L = 0.4;
+
+    // create the stylesheet
+    var style = document.createElement('style');
+    $('body').append(style);
 
     function hash(s) {
         var h = 5381;
@@ -42,31 +49,62 @@
 
     }
 
-    function recv(event) {
-        var $t = $(event.target);
+    function add_style(author, color) {
+        var cur = $(style).text();
 
-        // new messages are divs with a class of chat
-        if(!$t.is('div.chat')) return;
+        var rule = "span.author a[title=" + author + "]";
+        var _style = "color: " + color + " !important;";
 
-        //the actual div contains a bunch of spans, one for each part
-        //of the message
-
-        var $author = $t.find('span.author');
-        var nick = $author.find('a').text();
-
-        // get the color
-        var color = get_color(nick);
-
-        // finally, set the property
-        $author.css('color', color);
-
-        // need to set it on the anchor as well, since the css overrides it
-        $author.find('a').css('color', color);
-
-        return;
-
+        $(style).text(cur + rule + "{" + _style + "}");
     }
 
-    $('#buffer').bind('DOMNodeInserted', recv);
 
-})();
+    function process_message(message) {
+        if(message.type != 'buffer_msg') return;
+
+        var author = message.from;
+        if(_cache[author]) return;
+
+        var color = get_color(author);
+
+        _cache[author] = color;
+
+        add_style(author, color);
+
+    }
+    
+    // monkey patch controller.onMessage to call our function as well
+    controller.__monkey_onMessage = controller.onMessage;
+    controller.onMessage = function(message) {
+        process_message(message);
+        controller.__monkey_onMessage(message);
+    };
+
+};
+
+function inject(fn) {
+    /*
+     * this function works by injecting a small piece of bootstrap code
+     * that waits for the jQuery object to become available.
+     * once it is available, it calls the callback function, passing it
+     * the jQuery object
+     */
+
+    function busyloop(fn) {
+        if(typeof window.jQuery == 'undefined') {
+            window.setTimeout(function() { busyloop(fn) }, 100);
+            return;
+        }
+
+        fn(window.jQuery);
+    }
+
+    var wrap = '(' + fn.toString() + ')';
+
+    var script = document.createElement('script');
+    script.textContent += "(" + busyloop.toString() + ')(' + wrap + ');';
+    document.body.appendChild(script);
+
+}
+
+inject(colornicks);
