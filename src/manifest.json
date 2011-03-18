@@ -3,7 +3,8 @@
     "version": "0.2",
     "description": "Colors nicknames in IRCCloud chat.",
     "permissions": [
-        "*://irccloud.com/"
+        "*://irccloud.com/",
+        "*://www.irccloud.com/"
     ],
     "content_scripts": [{
         "matches": ["*://irccloud.com/"],
