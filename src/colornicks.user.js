@@ -17,16 +17,11 @@
 
 // Hashing and color algorithms borrowed from the chromatabs Firefox extension.
 
-function colornicks($) {
-
-    if(!controller) {
-        window.setTimeout(function() { colornicks($) }, 100);
-        return;
-    }
+function colornicks() {
 
     var _cache = [];
-    var S = 1.0;
-    var L = 0.4;
+    var S = 0.8;
+    var L = 0.25;
 
     // create the stylesheet
     var style = document.createElement('style');
@@ -59,7 +54,7 @@ function colornicks($) {
     }
 
 
-    function process_message(message) {
+    function process_message(evt, message) {
         if(message.type != 'buffer_msg') return;
 
         var author = message.from;
@@ -72,37 +67,82 @@ function colornicks($) {
         add_style(author, color);
 
     }
-    
-    // monkey patch controller.onMessage to call our function as well
-    controller.__monkey_onMessage = controller.onMessage;
-    controller.onMessage = function(message) {
-        process_message(message);
-        controller.__monkey_onMessage(message);
-    };
+
+    $(document).bind('pre.message.irccloud', process_message);
 
 };
 
 function inject(fn) {
     /*
-     * this function works by injecting a small piece of bootstrap code
-     * that waits for the jQuery object to become available.
-     * once it is available, it calls the callback function, passing it
-     * the jQuery object
+     * This function injects a small piece of code into the page as soon
+     * as jQuery is ready, and then when the controller is ready it hooks
+     * into the various controller methods to dispatch custom jQuery events
+     * that can be bound.
+     *
+     * The end result is your function looks like this on the page:
+     * (function($) {
+     *     function colornicks() {
+     *         ...
+     *     }
+     * })(jQuery)
      */
 
-    function busyloop(fn) {
+    function waitloop(fn) {
         if(typeof window.jQuery == 'undefined') {
-            window.setTimeout(function() { busyloop(fn) }, 100);
+            window.setTimeout(function() { waitloop(fn) }, 100);
             return;
         }
 
-        fn(window.jQuery);
+        fn();
     }
 
-    var wrap = '(' + fn.toString() + ')';
+    function hook_controller() {
+        // this function hooks into the controller as soon as it is ready
+        // and monkey patches various events to send jQuery events
+        if(!window.controller) {
+            window.setTimeout(hook_controller, 100);
+            return;
+        }
+
+        var events = [
+            ['onConnecting', 'connecting'],
+            ['onNoSocketData', 'nosocketdata'],
+            ['onDisconnect', 'disconnect'],
+            ['onBacklogMessage', 'backlogmessage'],
+            ['onMessage', 'message'],
+            ['onBufferScroll', 'bufferscroll']
+        ];
+
+        // make sure none of these events are hooked already
+        $.each(events, function(i) {
+            var ev = events[i][0];
+            var jq_ev = events[i][1];
+            var mp_ev = '__monkey_' + ev;
+            if(controller.hasOwnProperty(mp_ev)) {
+                return;
+            }
+
+            //wire em up
+
+            // store a reference to the original event
+            controller[mp_ev] = controller[ev];
+
+            // patch the original event
+            controller[ev] = function() {
+                var event_name = jq_ev + '.irccloud';
+                $(document).trigger('pre.' + event_name, arguments);
+                controller[mp_ev].apply(controller, arguments);
+                $(document).trigger('post.' + event_name, arguments);
+            }
+        });
+
+    }
+
+    var wrap = "(" + fn.toString() + ")";
 
     var script = document.createElement('script');
-    script.textContent += "(" + busyloop.toString() + ')(' + wrap + ');';
+    script.textContent += "(" + waitloop.toString() + ')(' + wrap + ');';
+    script.textContent += "\n\n(" + hook_controller.toString() + ")();";
     document.body.appendChild(script);
 
 }
