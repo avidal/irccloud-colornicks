@@ -44,13 +44,16 @@ function colornicks() {
     }
 
     function hash(s) {
-        var h = 5381;
+        var s = clean_nick(s);
+
+        var h = 0;
 
         for(var i = 0; i < s.length; i++) {
-            h = ((h << 5) + h) + s.charCodeAt(i);
+            h = s.charCodeAt(i) + (h << 6) + (h << 16) - h;
         }
 
         return h;
+
     }
 
     function get_color(nick) {
