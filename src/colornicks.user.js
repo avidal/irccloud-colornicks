@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Colored nick names in IRCcloud
-// @version         0.5.1
+// @version         0.5.2
 // @author          Alex Vidal, based on http://userscripts.org/scripts/show/88258, based on http://chatlogs.musicbrainz.org/mb_chatlogger.user.js
 // @licence         BSD
 //
