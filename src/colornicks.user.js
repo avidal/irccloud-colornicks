@@ -56,10 +56,27 @@ function colornicks() {
 
     }
 
-    function get_color(nick) {
-        var hue = hash(nick) % 360;
 
-        return "hsl(" + hue + "," + S*100 + "%," + L*100 + "%)";
+    function get_color(nick) {
+        var nickhash = hash(nick);
+
+        // get a positive value for the hue
+        var deg = nickhash % 360;
+        var h = deg < 0 ? 360 + deg : deg;
+
+        // default L is 50
+        var l = 50;
+
+        // half of the hues are too light, for those we
+        // decrease lightness
+        if(h >= 30 && h <= 120) {
+            l = 30;
+        }
+
+        // keep saturation above 20
+        var s = 20 + Math.abs(nickhash) % 80;
+
+        return "hsl(" + h + "," + s + "%," + l + "%)";
 
     }
 
