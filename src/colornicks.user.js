@@ -69,7 +69,7 @@ function colornicks() {
 
         // half of the hues are too light, for those we
         // decrease lightness
-        if(h >= 30 && h <= 120) {
+        if(h >= 30 && h <= 210) {
             l = 30;
         }
 
