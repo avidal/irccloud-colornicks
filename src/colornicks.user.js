@@ -27,6 +27,22 @@ function colornicks() {
     var style = document.createElement('style');
     $('body').append(style);
 
+    function clean_nick(nick) {
+        // attempts to clean up a nickname
+        // by removing alternate characters from the end
+        // nc_ becomes nc, avidal` becomes avidal
+
+        nick = nick.toLowerCase();
+
+        // typically ` and _ are used on the end alone
+        nick = nick.replace(/[`_]+$/, '');
+
+        // remove |<anything> from the end
+        nick = nick.replace(/|.*$/, '');
+
+        return nick;
+    }
+
     function hash(s) {
         var h = 5381;
 
