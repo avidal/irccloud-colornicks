@@ -86,7 +86,7 @@ function colornicks() {
         var rule = "span.author a[title=" + author + "]";
         var _style = "color: " + color + " !important;";
 
-        $(style).text(cur + rule + "{" + _style + "}");
+        $(style).text(cur + rule + "{" + _style + "}\n");
     }
 
 
