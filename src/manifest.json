@@ -1,6 +1,6 @@
 {
     "name": "IRCCloud Nick Colors",
-    "version": "0.5.2",
+    "version": "0.5.3",
     "description": "Colors nicknames in IRCCloud chat.",
     "icons": {
         "16": "res/icon16.png",

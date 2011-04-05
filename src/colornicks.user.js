@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Colored nick names in IRCcloud
-// @version         0.5.2
+// @version         0.5.3
 // @author          Alex Vidal, based on http://userscripts.org/scripts/show/88258, based on http://chatlogs.musicbrainz.org/mb_chatlogger.user.js
 // @licence         BSD
 //
@@ -83,7 +83,17 @@ function colornicks() {
     function add_style(author, color) {
         var cur = $(style).text();
 
-        var rule = "span.author a[title='" + author + "']";
+        // nicks are represented in an anchor with a title that
+        // looks like "<nick> (<hostmask>)", so we match on
+        // a title that starts with "<nick> "
+        var anchor = "a[title^='"+author+" ']";
+
+        // match on span.author for the chat window
+        var rule = "span.author " + anchor;
+
+        // and ul.memberList for the nick list
+        rule += ", ul.memberList li.user " + anchor;
+
         var _style = "color: " + color + " !important;";
 
         $(style).text(cur + rule + "{" + _style + "}\n");
@@ -140,13 +150,14 @@ function inject(fn) {
             return;
         }
 
+        // disable the events we don't care about
         var events = [
-            ['onConnecting', 'connecting'],
-            ['onNoSocketData', 'nosocketdata'],
-            ['onDisconnect', 'disconnect'],
-            ['onBacklogMessage', 'backlogmessage'],
+        //    ['onConnecting', 'connecting'],
+        //    ['onNoSocketData', 'nosocketdata'],
+        //    ['onDisconnect', 'disconnect'],
+        //    ['onBacklogMessage', 'backlogmessage'],
             ['onMessage', 'message'],
-            ['onBufferScroll', 'bufferscroll']
+        //    ['onBufferScroll', 'bufferscroll']
         ];
 
         // make sure none of these events are hooked already
