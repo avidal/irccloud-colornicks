@@ -114,84 +114,22 @@ function colornicks() {
 
     }
 
-    $(document).bind('pre.message.irccloud', process_message);
+    $(document).bind('message.cloudinject', process_message);
 
 };
 
-function inject(fn) {
-    /*
-     * This function injects a small piece of code into the page as soon
-     * as jQuery is ready, and then when the controller is ready it hooks
-     * into the various controller methods to dispatch custom jQuery events
-     * that can be bound.
-     *
-     * The end result is your function looks like this on the page:
-     * (function($) {
-     *     function colornicks() {
-     *         ...
-     *     }
-     * })(jQuery)
-     */
-
-    function waitloop(fn) {
-        if(typeof window.jQuery == 'undefined') {
-            window.setTimeout(function() { waitloop(fn) }, 100);
-            return;
-        }
-
-        fn();
-    }
-
-    function hook_controller() {
-        // this function hooks into the controller as soon as it is ready
-        // and monkey patches various events to send jQuery events
-        if(!window.controller) {
-            window.setTimeout(hook_controller, 100);
-            return;
-        }
-
-        // disable the events we don't care about
-        var events = [
-        //    ['onConnecting', 'connecting'],
-        //    ['onNoSocketData', 'nosocketdata'],
-        //    ['onDisconnect', 'disconnect'],
-        //    ['onBacklogMessage', 'backlogmessage'],
-            ['onMessage', 'message'],
-        //    ['onBufferScroll', 'bufferscroll']
-        ];
-
-        // make sure none of these events are hooked already
-        $.each(events, function(i) {
-            var ev = events[i][0];
-            var jq_ev = events[i][1];
-            var mp_ev = '__monkey_' + ev;
-            if(controller.hasOwnProperty(mp_ev)) {
-                return;
-            }
-
-            //wire em up
-
-            // store a reference to the original event
-            controller[mp_ev] = controller[ev];
-
-            // patch the original event
-            controller[ev] = function() {
-                var event_name = jq_ev + '.irccloud';
-                $(document).trigger('pre.' + event_name, arguments);
-                controller[mp_ev].apply(controller, arguments);
-                $(document).trigger('post.' + event_name, arguments);
-            }
-        });
-
-    }
-
-    var wrap = "(" + fn.toString() + ")";
-
-    var script = document.createElement('script');
-    script.textContent += "(" + waitloop.toString() + ')(' + wrap + ');';
-    script.textContent += "\n\n(" + hook_controller.toString() + ")();";
-    document.body.appendChild(script);
-
-}
-
-inject(colornicks);
+/* CloudInject bootstrapper */
+var PLUGIN=['Color Nicks', colornicks, 'v0.5.4'];
+(function(d,t,p){
+    p[1]=p[1].toString();
+    var f=function(){
+        var s=d.createElement(t);
+        s.textContent='window.CloudInject.inject("'+p[0]+'",'+p[1]+',"'+p[2]+'");';
+        g.body.appendChild(s);
+    };
+    var c=d.createElement(t),s=d.getElementsByTagName(t)[0];c.async=1;
+    c.src='https://github.com/avidal/cloudinject/raw/master/cloudinject.js';
+    s.parentNode.insertBefore(c,s);
+    c.onload=f,c.onreadystatechange=function(){this.readyState=='complete'&&f();};
+}(document,'script',PLUGIN));
+/* End bootstrapper */
