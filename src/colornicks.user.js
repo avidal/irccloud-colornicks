@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Colored nick names in IRCcloud
-// @version         0.5.3
+// @version         0.5.4
 // @author          Alex Vidal, based on http://userscripts.org/scripts/show/88258, based on http://chatlogs.musicbrainz.org/mb_chatlogger.user.js
 // @licence         BSD
 //
@@ -17,7 +17,7 @@
 
 // Hashing and color algorithms borrowed from the chromatabs Firefox extension.
 
-function colornicks() {
+function colornicks(ci, $) {
 
     var _cache = [];
     var S = 0.8;
@@ -56,8 +56,15 @@ function colornicks() {
 
     }
 
-
     function get_color(nick) {
+        if(_cache[nick]) return _cache[nick];
+        var color = generate_color(nick);
+        _cache[nick] = color;
+        return color;
+    }
+
+    function generate_color(nick) {
+
         var nickhash = hash(nick);
 
         // get a positive value for the hue
@@ -76,7 +83,9 @@ function colornicks() {
         // keep saturation above 20
         var s = 20 + Math.abs(nickhash) % 80;
 
-        return "hsl(" + h + "," + s + "%," + l + "%)";
+        var col = "hsl(" + h + "," + s + "%," + l + "%)";
+
+        return col;
 
     }
 
@@ -85,8 +94,14 @@ function colornicks() {
 
         // nicks are represented in an anchor with a title that
         // looks like "<nick> (<hostmask>)", so we match on
-        // a title that starts with "<nick> "
-        var anchor = "a[title^='"+author+" ']";
+        // a title that starts with "<nick>"
+        // because the hostmask only exists once that person has
+        // been properly identified, there are situations where
+        // a particular nick won't have any color forever.
+        // since our actual selectors are fairly specific,
+        // there's no need to require the space after the authors
+        // name in the anchor title.
+        var anchor = "a[title^='"+author+"']";
 
         // match on span.author for the chat window
         var rule = "span.author " + anchor;
@@ -98,7 +113,6 @@ function colornicks() {
 
         $(style).text(cur + rule + "{" + _style + "}\n");
     }
-
 
     function process_message(evt, message) {
         if(message.type != 'buffer_msg') return;
@@ -116,6 +130,43 @@ function colornicks() {
 
     $(document).bind('message.cloudinject', process_message);
 
+    // create a member context entry to set a specific color for a user
+    var entry = '<form class="form messageForm"><p><label for="custom_color">Custom Color:</label></p>';
+    entry += '<input class="input" id="custom_color"></form>';
+
+    var options = {};
+
+    ci.addToMemberContext(entry, {
+        selector: 'input',
+        evt: 'blur',
+        callback: function(event, member) {
+            var color = $(this).val();
+            if(!color) {
+                // if the value is empty, then generate a new one
+                color = generate_color(member.nick);
+            }
+
+            // update the cache
+            _cache[member.nick] = color;
+
+            // and apply the style
+            add_style(member.nick, color);
+        },
+    });
+
+    // bind to the form submit so it doesn't occur
+    $('#custom_color').parents('form').submit(function(event) {
+        event.preventDefault();
+    });
+
+    $(document).bind('show.membercontext.cloudinject', function(event, member) {
+        // when the member context is popped, we want to
+        // set the color input to the color we've calculated
+        // for that user
+        var color = get_color(member.nick);
+        $("#custom_color").val(color);
+    });
+
 };
 
 /* CloudInject bootstrapper */
@@ -124,11 +175,13 @@ var PLUGIN=['Color Nicks', colornicks, 'v0.5.4'];
     p[1]=p[1].toString();
     var f=function(){
         var s=d.createElement(t);
-        s.textContent='window.CloudInject.inject("'+p[0]+'",'+p[1]+',"'+p[2]+'");';
-        g.body.appendChild(s);
+        var c='if(typeof __ci_plugins == "undefined"){__ci_plugins=[];}';
+        c+='__ci_plugins.push(["'+p[0]+'",'+p[1]+',"'+p[2]+'"]);';
+        s.textContent=c;d.body.appendChild(s);
     };
     var c=d.createElement(t),s=d.getElementsByTagName(t)[0];c.async=1;
     c.src='https://github.com/avidal/cloudinject/raw/master/cloudinject.js';
+    //c.src='https://localhost:5002/cloudinject.js';
     s.parentNode.insertBefore(c,s);
     c.onload=f,c.onreadystatechange=function(){this.readyState=='complete'&&f();};
 }(document,'script',PLUGIN));
