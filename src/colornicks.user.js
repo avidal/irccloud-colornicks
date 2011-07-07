@@ -156,7 +156,7 @@ function inject(fn) {
         //    ['onNoSocketData', 'nosocketdata'],
         //    ['onDisconnect', 'disconnect'],
         //    ['onBacklogMessage', 'backlogmessage'],
-            ['processMessage', 'message'],
+            ['handleMessage', 'message'],
         //    ['onBufferScroll', 'bufferscroll']
         ];
 
