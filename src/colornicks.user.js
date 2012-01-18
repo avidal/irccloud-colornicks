@@ -20,12 +20,13 @@
 // Hashing and color algorithms borrowed from the chromatabs Firefox extension.
 
 function colornicks() {
+    'use strict';
 
     var _cache = [];
     var S = 0.8;
     var L = 0.25;
 
-    var is_alpha = typeof(window.SESSION) != 'undefined';
+    var is_alpha = typeof(window.SESSION) !== 'undefined';
 
     // create the stylesheet
     var style = document.createElement('style');
@@ -47,13 +48,12 @@ function colornicks() {
         return nick;
     }
 
-    function hash(s) {
-        var s = clean_nick(s);
-
+    function hash(nick) {
+        var cleaned = clean_nick(nick);
         var h = 0;
 
-        for(var i = 0; i < s.length; i++) {
-            h = s.charCodeAt(i) + (h << 6) + (h << 16) - h;
+        for(var i = 0; i < cleaned.length; i++) {
+            h = cleaned.charCodeAt(i) + (h << 6) + (h << 16) - h;
         }
 
         return h;
@@ -86,31 +86,36 @@ function colornicks() {
 
     function add_style(author, color) {
         var cur = $(style).text();
+        var attr = "", chat_rule = "", list_rule = "", rule = "", _style = "";
 
         if(is_alpha === true) {
             // for the alpha, we use the data-name attribute instead of
             // the title attribute
-            var attr = "[data-name='"+author+"']";
-            var chat_rule = "span.author a"+attr;
-            var list_rule = "ul.memberList li.user a.present"+attr;
+            attr = "[data-name='"+author+"']";
+            chat_rule = "span.author a"+attr;
+            list_rule = "ul.memberList li.user a.present"+attr;
         } else {
-            var attr = "[title^='"+author+" ']";
-            var chat_rule = "span.author a"+attr;
-            var list_rule = "ul.memberList li.user a"+attr;
+            attr = "[title^='"+author+" ']";
+            chat_rule = "span.author a"+attr;
+            list_rule = "ul.memberList li.user a"+attr;
         }
 
-        var rule = chat_rule + ", " + list_rule;
-        var _style = "color: " + color + " !important;";
+        rule = chat_rule + ", " + list_rule;
+        _style = "color: " + color + " !important;";
 
         $(style).text(cur + rule + "{" + _style + "}\n");
     }
 
 
     function process_message(evt, message) {
-        if(message.type != 'buffer_msg') return;
+        if(message.type !== 'buffer_msg') {
+            return;
+        }
 
         var author = message.from;
-        if(_cache[author]) return;
+        if(_cache[author]) {
+            return;
+        }
 
         var color = get_color(author);
 
@@ -126,9 +131,10 @@ function colornicks() {
         $(document).bind('pre.message.irccloud', process_message);
     }
 
-};
+}
 
 function inject(fn) {
+    'use strict';
     /*
      * This function injects a small piece of code into the page as soon
      * as jQuery is ready, and then when the controller is ready it hooks
@@ -144,8 +150,8 @@ function inject(fn) {
      */
 
     function waitloop(fn) {
-        var has_controller = typeof(window.controller) != 'undefined';
-        var has_jquery = typeof(window.jQuery) != 'undefined';
+        var has_controller = typeof(window.controller) !== 'undefined';
+        var has_jquery = typeof(window.jQuery) !== 'undefined';
 
         if(has_jquery === false || has_controller === false)) {
             console.log("[CN] Resources are not ready...");
@@ -161,14 +167,14 @@ function inject(fn) {
         // wait for existence of the controller OR the SESSION object
         // this function hooks into the controller as soon as it is ready
         // and monkey patches various events to send jQuery events
-        var has_controller = typeof(window.controller) != 'undefined';
-        var has_session = typeof(window.SESSION) != 'undefined';
+        var has_controller = typeof(window.controller) !== 'undefined';
+        var has_session = typeof(window.SESSION) !== 'undefined';
 
         console.log("[CN] Controller? " + has_controller + "; Session? " + has_session);
 
         if(has_session === false && has_controller === false) {
             console.log("[CN] Controller or session not available.");
-            window.setTimeout(arguments.callee, 100);
+            window.setTimeout(hook_controller, 100);
             return;
         }
 
@@ -178,8 +184,11 @@ function inject(fn) {
         if(has_session === false) {
             console.log("[CN] Patching controller events.");
             var events = [
-                ['handleMessage', 'message'],
+                ['handleMessage', 'message']
             ];
+
+            // local alias of window.controller
+            var controller = window.controller;
 
             // make sure none of these events are hooked already
             $.each(events, function(i) {
@@ -201,20 +210,22 @@ function inject(fn) {
                     $(document).trigger('pre.' + event_name, arguments);
                     controller[mp_ev].apply(controller, arguments);
                     $(document).trigger('post.' + event_name, arguments);
-                }
+                };
                 console.log("[CN] Finished binding event " + ev);
             });
+
+            window.controller = controller;
         }
     }
 
     var wrap = "(" + fn.toString() + ")";
 
-    console.log("[CN] Injecting wrapper script.")
+    console.log("[CN] Injecting wrapper script.");
     var script = document.createElement('script');
     script.textContent += "(" + waitloop.toString() + ')(' + wrap + ');';
     script.textContent += "\n\n(" + hook_controller.toString() + ")();";
     document.body.appendChild(script);
-    console.log("[CN] Done injecting wrapper script.")
+    console.log("[CN] Done injecting wrapper script.");
 
 }
 
