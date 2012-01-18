@@ -157,7 +157,7 @@ function inject(fn) {
         var has_controller = typeof(window.controller) !== 'undefined';
         var has_jquery = typeof(window.jQuery) !== 'undefined';
 
-        if(has_jquery === false || has_controller === false)) {
+        if(has_jquery === false || has_controller === false) {
             console.log("[CN] Resources are not ready...");
             window.setTimeout(function() { waitloop(fn); }, 100);
             return;
