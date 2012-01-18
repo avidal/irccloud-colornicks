@@ -20,7 +20,7 @@
 // Hashing and color algorithms borrowed from the chromatabs Firefox extension.
 
 function colornicks() {
-    "use strict";
+    'use strict';
 
     console.log("[CN] Plugin function called!");
 
@@ -52,13 +52,12 @@ function colornicks() {
         return nick;
     }
 
-    function hash(s) {
-        var s = clean_nick(s);
-
+    function hash(nick) {
+        var cleaned = clean_nick(nick);
         var h = 0;
 
-        for(var i = 0; i < s.length; i++) {
-            h = s.charCodeAt(i) + (h << 6) + (h << 16) - h;
+        for(var i = 0; i < cleaned.length; i++) {
+            h = cleaned.charCodeAt(i) + (h << 6) + (h << 16) - h;
         }
 
         return h;
@@ -118,7 +117,9 @@ function colornicks() {
         }
 
         var author = message.from;
-        if(_cache[author]) return;
+        if(_cache[author]) {
+            return;
+        }
 
         var color = get_color(author);
 
@@ -141,6 +142,7 @@ function colornicks() {
 }
 
 function inject(fn) {
+    'use strict';
     /*
      * This function injects a small piece of code into the page as soon
      * as jQuery is ready, and then when the controller is ready it hooks
@@ -163,7 +165,7 @@ function inject(fn) {
 
         if(!(has_jquery && has_controller)) {
             console.log("[CN-WL] Resources are not ready...");
-            window.setTimeout(function() { waitloop(fn) }, 100);
+            window.setTimeout(function() { waitloop(fn); }, 100);
             return;
         }
 
@@ -182,7 +184,7 @@ function inject(fn) {
 
         if(!(has_session || has_controller)) {
             console.log("[CN] Controller or session not available.");
-            window.setTimeout(arguments.callee, 100);
+            window.setTimeout(hook_controller, 100);
             return;
         }
 
@@ -194,6 +196,9 @@ function inject(fn) {
             var events = [
                 ['handleMessage', 'message']
             ];
+
+            // local alias of window.controller
+            var controller = window.controller;
 
             // make sure none of these events are hooked already
             $.each(events, function(i) {
@@ -218,6 +223,8 @@ function inject(fn) {
                 };
                 console.log("[CN] Finished binding event " + ev);
             });
+
+            window.controller = controller;
         }
     }
 
