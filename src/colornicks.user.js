@@ -148,13 +148,16 @@ function inject(fn) {
      */
 
     function waitloop(fn) {
-        if(typeof window.jQuery == 'undefined') {
-            console.log("[CN] jQuery is not ready...");
+        var has_controller = typeof(window.controller) != 'undefined';
+        var has_jquery = typeof(window.jQuery) != 'undefined';
+
+        if(!(has_jquery || has_controller)) {
+            console.log("[CN] Resources are not ready...");
             window.setTimeout(function() { waitloop(fn) }, 100);
             return;
         }
 
-        console.log("[CN] jQuery is ready, calling plugin function.");
+        console.log("[CN] Required resources are ready, calling plugin function.");
         fn();
     }
 
