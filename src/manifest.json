@@ -1,6 +1,6 @@
 {
     "name": "IRCCloud Nick Colors",
-    "version": "0.6.0",
+    "version": "0.7.0",
     "description": "Colors nicknames in IRCCloud chat.",
     "icons": {
         "16": "res/icon16.png",
@@ -9,10 +9,13 @@
     },
     "permissions": [
         "*://irccloud.com/",
-        "*://www.irccloud.com/"
+        "*://www.irccloud.com/",
+        "*://alpha.irccloud.com/"
     ],
     "content_scripts": [{
-        "matches": ["*://irccloud.com/", "*://www.irccloud.com/"],
+        "matches": ["*://irccloud.com/",
+                    "*://www.irccloud.com/",
+                    "*://alpha.irccloud.com/"],
         "js": ["colornicks.user.js"]
     }]
 }
