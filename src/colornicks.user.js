@@ -20,6 +20,7 @@
 // Hashing and color algorithms borrowed from the chromatabs Firefox extension.
 
 function colornicks() {
+    "use strict";
 
     console.log("[CN] Plugin function called!");
 
@@ -27,7 +28,7 @@ function colornicks() {
     var S = 0.8;
     var L = 0.25;
 
-    var is_alpha = typeof(window.SESSION) != 'undefined';
+    var is_alpha = typeof(window.SESSION) !== 'undefined';
 
     console.log("[CN] Is alpha? " + is_alpha);
 
@@ -90,28 +91,31 @@ function colornicks() {
 
     function add_style(author, color) {
         var cur = $(style).text();
+        var attr = "", chat_rule = "", list_rule = "", rule = "", _style = "";
 
         if(is_alpha === true) {
             // for the alpha, we use the data-name attribute instead of
             // the title attribute
-            var attr = "[data-name='"+author+"']";
-            var chat_rule = "span.author a"+attr;
-            var list_rule = "ul.memberList li.user a.present"+attr;
+            attr = "[data-name='"+author+"']";
+            chat_rule = "span.author a"+attr;
+            list_rule = "ul.memberList li.user a.present"+attr;
         } else {
-            var attr = "[title^='"+author+" ']";
-            var chat_rule = "span.author a"+attr;
-            var list_rule = "ul.memberList li.user a"+attr;
+            attr = "[title^='"+author+" ']";
+            chat_rule = "span.author a"+attr;
+            list_rule = "ul.memberList li.user a"+attr;
         }
 
-        var rule = chat_rule + ", " + list_rule;
-        var _style = "color: " + color + " !important;";
+        rule = chat_rule + ", " + list_rule;
+        _style = "color: " + color + " !important;";
 
         $(style).text(cur + rule + "{" + _style + "}\n");
     }
 
 
     function process_message(evt, message) {
-        if(message.type != 'buffer_msg') return;
+        if(message.type !== 'buffer_msg') {
+            return;
+        }
 
         var author = message.from;
         if(_cache[author]) return;
@@ -130,7 +134,7 @@ function colornicks() {
         $(document).bind('pre.message.irccloud', process_message);
     }
 
-};
+}
 
 function inject(fn) {
     /*
@@ -148,8 +152,8 @@ function inject(fn) {
      */
 
     function waitloop(fn) {
-        var has_controller = typeof(window.controller) != 'undefined';
-        var has_jquery = typeof(window.jQuery) != 'undefined';
+        var has_controller = typeof(window.controller) !== 'undefined';
+        var has_jquery = typeof(window.jQuery) !== 'undefined';
 
         console.log("[CN-WL] Controller? " + has_controller + "; jQuery? " + has_jquery);
 
@@ -167,8 +171,8 @@ function inject(fn) {
         // wait for existence of the controller OR the SESSION object
         // this function hooks into the controller as soon as it is ready
         // and monkey patches various events to send jQuery events
-        var has_controller = typeof(window.controller) != 'undefined';
-        var has_session = typeof(window.SESSION) != 'undefined';
+        var has_controller = typeof(window.controller) !== 'undefined';
+        var has_session = typeof(window.SESSION) !== 'undefined';
 
         console.log("[CN] Controller? " + has_controller + "; Session? " + has_session);
 
@@ -184,7 +188,7 @@ function inject(fn) {
         if(has_session === false) {
             console.log("[CN] Patching controller events.");
             var events = [
-                ['handleMessage', 'message'],
+                ['handleMessage', 'message']
             ];
 
             // make sure none of these events are hooked already
@@ -207,7 +211,7 @@ function inject(fn) {
                     $(document).trigger('pre.' + event_name, arguments);
                     controller[mp_ev].apply(controller, arguments);
                     $(document).trigger('post.' + event_name, arguments);
-                }
+                };
                 console.log("[CN] Finished binding event " + ev);
             });
         }
@@ -215,12 +219,12 @@ function inject(fn) {
 
     var wrap = "(" + fn.toString() + ")";
 
-    console.log("[CN] Injecting wrapper script.")
+    console.log("[CN] Injecting wrapper script.");
     var script = document.createElement('script');
     script.textContent += "(" + waitloop.toString() + ')(' + wrap + ');';
     script.textContent += "\n\n(" + hook_controller.toString() + ")();";
     document.body.appendChild(script);
-    console.log("[CN] Done injecting wrapper script.")
+    console.log("[CN] Done injecting wrapper script.");
 
 }
 
