@@ -112,7 +112,7 @@ function colornicks() {
     }
 
 
-    function process_message(evt, message) {
+    function process_message(message) {
         if(message.type !== 'buffer_msg') {
             return;
         }
@@ -131,7 +131,11 @@ function colornicks() {
     if(is_alpha === true) {
         window.SESSION.backend.bind('message:buffer_msg', process_message);
     } else {
-        $(document).bind('pre.message.irccloud', process_message);
+        // for compatibility purposes, strip out the first argument
+        // before dispatching
+        $(document).bind('pre.message.irccloud', function(evt, message) {
+            process_message(message);
+        });
     }
 
 }
