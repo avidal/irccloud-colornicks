@@ -151,13 +151,15 @@ function inject(fn) {
         var has_controller = typeof(window.controller) != 'undefined';
         var has_jquery = typeof(window.jQuery) != 'undefined';
 
-        if(has_jquery === false || has_controller === false)) {
-            console.log("[CN] Resources are not ready...");
+        console.log("[CN-WL] Controller? " + has_controller + "; jQuery? " + has_jquery);
+
+        if(!(has_jquery && has_controller)) {
+            console.log("[CN-WL] Resources are not ready...");
             window.setTimeout(function() { waitloop(fn) }, 100);
             return;
         }
 
-        console.log("[CN] Required resources are ready, calling plugin function.");
+        console.log("[CN-WL] Required resources are ready, calling plugin function.");
         fn();
     }
 
@@ -170,7 +172,7 @@ function inject(fn) {
 
         console.log("[CN] Controller? " + has_controller + "; Session? " + has_session);
 
-        if(has_session === false || has_controller === false) {
+        if(!(has_session || has_controller)) {
             console.log("[CN] Controller or session not available.");
             window.setTimeout(arguments.callee, 100);
             return;
