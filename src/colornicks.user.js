@@ -147,7 +147,7 @@ function inject(fn) {
         var has_controller = typeof(window.controller) != 'undefined';
         var has_jquery = typeof(window.jQuery) != 'undefined';
 
-        if(!(has_jquery && has_controller)) {
+        if(has_jquery === false || has_controller === false)) {
             console.log("[CN] Resources are not ready...");
             window.setTimeout(function() { waitloop(fn); }, 100);
             return;
@@ -164,7 +164,9 @@ function inject(fn) {
         var has_controller = typeof(window.controller) != 'undefined';
         var has_session = typeof(window.SESSION) != 'undefined';
 
-        if(!(has_session || has_controller)) {
+        console.log("[CN] Controller? " + has_controller + "; Session? " + has_session);
+
+        if(has_session === false && has_controller === false) {
             console.log("[CN] Controller or session not available.");
             window.setTimeout(arguments.callee, 100);
             return;
