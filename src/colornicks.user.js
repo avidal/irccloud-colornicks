@@ -21,11 +21,15 @@
 
 function colornicks() {
 
+    console.log("[CN] Plugin function called!");
+
     var _cache = [];
     var S = 0.8;
     var L = 0.25;
 
     var is_alpha = typeof(window.SESSION) != 'undefined';
+
+    console.log("[CN] Is alpha? " + is_alpha);
 
     // create the stylesheet
     var style = document.createElement('style');
@@ -145,10 +149,12 @@ function inject(fn) {
 
     function waitloop(fn) {
         if(typeof window.jQuery == 'undefined') {
+            console.log("[CN] jQuery is not ready...");
             window.setTimeout(function() { waitloop(fn) }, 100);
             return;
         }
 
+        console.log("[CN] jQuery is ready, calling plugin function.");
         fn();
     }
 
@@ -159,7 +165,10 @@ function inject(fn) {
         var has_controller = typeof(window.controller) != 'undefined';
         var has_session = typeof(window.SESSION) != 'undefined';
 
+        console.log("[CN] Controller? " + has_controller + "; Session? " + has_session);
+
         if(!(has_session || has_controller)) {
+            console.log("[CN] Controller or session not available.");
             window.setTimeout(arguments.callee, 100);
             return;
         }
@@ -168,6 +177,7 @@ function inject(fn) {
         // the event routines, since they dispatch using Backbone.js anyway
         // so we don't want to do the monkeying
         if(has_session === false) {
+            console.log("[CN] Patching controller events.");
             var events = [
                 ['handleMessage', 'message'],
             ];
@@ -193,16 +203,19 @@ function inject(fn) {
                     controller[mp_ev].apply(controller, arguments);
                     $(document).trigger('post.' + event_name, arguments);
                 }
+                console.log("[CN] Finished binding event " + ev);
             });
         }
     }
 
     var wrap = "(" + fn.toString() + ")";
 
+    console.log("[CN] Injecting wrapper script.")
     var script = document.createElement('script');
     script.textContent += "(" + waitloop.toString() + ')(' + wrap + ');';
     script.textContent += "\n\n(" + hook_controller.toString() + ")();";
     document.body.appendChild(script);
+    console.log("[CN] Done injecting wrapper script.")
 
 }
 
