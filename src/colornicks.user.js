@@ -126,7 +126,7 @@ function colornicks() {
     }
 
     if(is_alpha === true) {
-        window.SESSION.backend.bind('message:buffer_msg', process_message);
+        window.SESSION.backend.bind('message', process_message);
     } else {
         // for compatibility purposes, strip out the first argument
         // before dispatching
