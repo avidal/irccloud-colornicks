@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            irccloud-colornicks
 // @description     Colors nick names in IRCCloud
-// @version         0.7.2
+// @version         0.8.0
 // @author          Alex Vidal, based on http://userscripts.org/scripts/show/88258, based on http://chatlogs.musicbrainz.org/mb_chatlogger.user.js
 // @licence         BSD
 //
