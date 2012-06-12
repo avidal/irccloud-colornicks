@@ -95,7 +95,7 @@ function colornicks() {
         if(is_alpha === true) {
             chat_rule = "a.author"+attr;
         } else {
-            chat_rule = "span.author a"+attr;
+            chat_rule = "div.me a.author"+attr+", span.author a"+attr;
         }
 
         rule = chat_rule + ", " + list_rule;
